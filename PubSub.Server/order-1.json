@@ -1,0 +1,10 @@
+{
+    "Id": "5980c8d6-d961-4d4b-ba24-1e9cbc072de6",
+    "Description": "Order-type-1",
+    "Price": 200.13,
+    "CreatedOn": "2022-10-18T09:34:22+02:00",
+    "Contact": {
+        "Id": "a980c8d6-d961-4d4b-ba24-1e9cbc072de2",
+        "FullName": "Jack the Ripper"
+    }
+}

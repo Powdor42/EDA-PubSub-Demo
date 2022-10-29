@@ -1,0 +1,7 @@
+{
+    "Description": "Order-type-1",
+    "Price": 300.456,
+    "Contact": {
+        "FullName": "Pipo the Clown"
+    }
+}
