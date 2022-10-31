@@ -30,18 +30,26 @@ public static class Extensions {
 
         services.AddRebus((configure, provider) => configure
                         .Logging(l => l.ColoredConsole(LogLevel.Debug))
+                        
 
-                        .UseCloudEvents(c => c
+/*                        .UseCloudEvents(c => c
                             .WithSource(new Uri(config.SourceUri))
                             .WithTypes(t => t
                                 .Map<Order>(nameof(Order))
                                 .Map<CreateOrderCommand>(nameof(CreateOrderCommand))))
-
+*/
+                        .InjectMessageId()
                         .Transport(t => t
                             .UseAzureServiceBus($"Endpoint={config.EndPoint}", config.ListeningQueue, new DefaultAzureCredential())
                             .AutomaticallyRenewPeekLock()
                                 .SetDuplicateDetectionHistoryTimeWindow(new TimeSpan(0, 2, 0)))
                                 .Options(c => c.SimpleRetryStrategy(errorQueueAddress: config.ErrorQueueName))
+
+                        .Serialization(s => s.UseCloudEvents()
+                            .WithSource(new Uri(config.SourceUri))
+                            .WithTypes(t => t
+                                .Map<Order>(nameof(Order))
+                                .Map<CreateOrderCommand>(nameof(CreateOrderCommand))))                      
 
                         .Options(o => o.Decorate<ITopicNameConvention>(_ => new SimpleTopicNamingConvention()))
 
