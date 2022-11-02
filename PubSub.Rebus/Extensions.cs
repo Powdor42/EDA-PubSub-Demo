@@ -11,17 +11,14 @@ using Rebus.Logging;
 using Rebus.Retry.Simple;
 using Rebus.Routing.TypeBased;
 using Rebus.Topic;
-using Options = Microsoft.Extensions.Options.Options;
 
 namespace PubSub.Rebus;
-
 
 public static class Extensions {
     public static IServiceCollection AddRebusConfiguration(this IServiceCollection services, AzureServicebusOptions? config, PubSubAppMode mode) {
         if (config == null)
             throw new ArgumentNullException(nameof(config));
 
-        //services.AutoRegisterHandlersFromAssemblyOf<SimpleTopicNamingConvention>();
         if (mode == PubSubAppMode.Client) {
             services.AddTransient<IHandleMessages<Order>, OrderMessageHandler>();
         }
@@ -32,15 +29,9 @@ public static class Extensions {
         services.AddRebus((configure, provider) => configure
                         .Logging(l => l.ColoredConsole(LogLevel.Debug))
 
-
-/*                        .UseCloudEvents(c => c
-                            .WithSource(new Uri(config.SourceUri))
-                            .WithTypes(t => t
-                                .Map<Order>(nameof(Order))
-                                .Map<CreateOrderCommand>(nameof(CreateOrderCommand))))
-*/
                         .Options(o => o.InjectMessageId())
-                        .Options(o => o.UseCustomTypeNameForTopicName())
+                        .Options(o => o.Decorate<ITopicNameConvention>(_ => new SimpleTopicNamingConvention()))
+
                         .Transport(t => t
                             .UseAzureServiceBus($"Endpoint={config.EndPoint}", config.ListeningQueue, new DefaultAzureCredential())
                             .AutomaticallyRenewPeekLock()
