@@ -11,6 +11,7 @@ using Rebus.Logging;
 using Rebus.Retry.Simple;
 using Rebus.Routing.TypeBased;
 using Rebus.Topic;
+using Options = Microsoft.Extensions.Options.Options;
 
 namespace PubSub.Rebus;
 
@@ -30,7 +31,7 @@ public static class Extensions {
 
         services.AddRebus((configure, provider) => configure
                         .Logging(l => l.ColoredConsole(LogLevel.Debug))
-                        
+
 
 /*                        .UseCloudEvents(c => c
                             .WithSource(new Uri(config.SourceUri))
@@ -38,7 +39,8 @@ public static class Extensions {
                                 .Map<Order>(nameof(Order))
                                 .Map<CreateOrderCommand>(nameof(CreateOrderCommand))))
 */
-                        .InjectMessageId()
+                        .Options(o => o.InjectMessageId())
+                        .Options(o => o.UseCustomTypeNameForTopicName())
                         .Transport(t => t
                             .UseAzureServiceBus($"Endpoint={config.EndPoint}", config.ListeningQueue, new DefaultAzureCredential())
                             .AutomaticallyRenewPeekLock()
@@ -46,12 +48,8 @@ public static class Extensions {
                                 .Options(c => c.SimpleRetryStrategy(errorQueueAddress: config.ErrorQueueName))
 
                         .Serialization(s => s.UseCloudEvents()
-                            .WithSource(new Uri(config.SourceUri))
-                            .WithTypes(t => t
-                                .Map<Order>(nameof(Order))
-                                .Map<CreateOrderCommand>(nameof(CreateOrderCommand))))                      
-
-                        .Options(o => o.Decorate<ITopicNameConvention>(_ => new SimpleTopicNamingConvention()))
+                            .AddWithShortName<Order>()
+                            .AddWithShortName<CreateOrderCommand>())
 
                         .Routing(r => {
                             var z = r.TypeBased();
