@@ -8,5 +8,6 @@ public enum PubSubPacakgeType {
 
 public enum PubSubAppMode {
     Client,
-    Server
+    Server,
+    Infra
 }

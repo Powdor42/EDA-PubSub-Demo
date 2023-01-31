@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PubSub.Core.Handlers;
+using PubSub.Core.Interfaces;
 using PubSub.Core.Models;
 using PubSub.Core.Options;
 using PubSub.MassTransit;
@@ -13,19 +14,22 @@ var mode = "Rebus";
 
 Console.WriteLine($"Pubsub Client (Demo App) mode={mode}");
 
-AzureServicebusOptions? azConfig = default;
+if (args != null && args.Length > 0 && args[0].Equals("build", StringComparison.OrdinalIgnoreCase)) {
+    IPubSubInfraBuilder builder = new RebusInfraBuilder();
+    _ = builder.Build(new[] { typeof(Order) }, PubSubAppMode.Client);
+    return;
+}
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) => {
         services.AddLogging(c => c.AddConsole());
         services.Configure<LoggerFilterOptions>(cf => cf.MinLevel = LogLevel.Debug);
         services.AddTransient<IOrderHandler, OrderHandler>();
-        azConfig = context.Configuration.GetRequiredSection(nameof(AzureServicebusOptions)).Get<AzureServicebusOptions>();
         if (mode == "Rebus") {
-            services.AddRebusConfiguration(azConfig, PubSubAppMode.Client);
+            services.AddRebusConfiguration(context.Configuration, PubSubAppMode.Client);
         }
         else {
-            services.AddMassTransitConfiguration(azConfig, PubSubAppMode.Client);
+            services.AddMassTransitConfiguration(context.Configuration, PubSubAppMode.Client);
         }
     }).Build();
 
@@ -33,7 +37,7 @@ host.Start();
 
 
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
-
+var azConfig = host.Services.GetRequiredService<AzureServicebusOptions>();
 var pubSubService = host.Services.GetRequiredService<IPubSubService>();
 
 await pubSubService.Subcribe<Order>(azConfig!.Topic);

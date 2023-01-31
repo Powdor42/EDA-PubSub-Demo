@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -13,19 +12,23 @@ using PubSub.Rebus;
 var mode = "Rebus";
 Console.WriteLine($"Pubsub Server (Demo App) mode={mode}");
 
-AzureServicebusOptions? azConfig = default;
+if (args != null && args.Length > 0 && args[0].Equals("build", StringComparison.OrdinalIgnoreCase)) {
+    IPubSubInfraBuilder builder = new RebusInfraBuilder();
+    await builder.Build(new[] { typeof(Order) }, PubSubAppMode.Server);
+    return;
+}
+
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) => {
         services.AddLogging(c => c.AddConsole());
         services.Configure<LoggerFilterOptions>(cf => cf.MinLevel = LogLevel.Debug);
         services.AddTransient<IOrderCommandHandler, OrderCommandHandler>();
-        azConfig = context.Configuration.GetRequiredSection(nameof(AzureServicebusOptions)).Get<AzureServicebusOptions>();
         if (mode == "Rebus") {
-            services.AddRebusConfiguration(azConfig, PubSubAppMode.Server);
+            services.AddRebusConfiguration(context.Configuration, PubSubAppMode.Server);
         }
         else {
-            services.AddMassTransitConfiguration(azConfig, PubSubAppMode.Server);
+            services.AddMassTransitConfiguration(context.Configuration, PubSubAppMode.Server);
         }
     }).Build();
 
@@ -35,6 +38,7 @@ host.Start();
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
 
 var pubSubService = host.Services.GetRequiredService<IPubSubService>();
+var azConfig = host.Services.GetRequiredService<AzureServicebusOptions>();
 
 logger.LogInformation("Configuration:\r\n{azConfig}", azConfig);
 logger.LogInformation($"{nameof(Order)} objects are published with CloudEvent type: {nameof(Order)}");

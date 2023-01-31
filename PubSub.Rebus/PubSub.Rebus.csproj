@@ -4,16 +4,20 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>607a848c-0e9f-44f1-a028-45a7fc8114b3</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CloudEventify.Rebus" Version="2.0.57" />
+    <PackageReference Include="CloudEventify.Rebus" Version="2.1.67" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Graph" Version="4.47.0" />
+    <PackageReference Include="Rebus" Version="6.6.5" />  
 	<PackageReference Include="Rebus.AzureServiceBus" Version="9.1.0" />
 	<PackageReference Include="Rebus.ServiceProvider" Version="8.3.1" />
 	<PackageReference Include="Rebus.Microsoft.Extensions.Logging" Version="2.0.0" />
-	<PackageReference Include="Azure.Identity" Version="1.7.0" />
+	<PackageReference Include="Azure.Identity" Version="1.8.0" />
 
   </ItemGroup>
 

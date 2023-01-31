@@ -1,6 +1,7 @@
 ﻿using CloudEventify.MassTransit;
 using MassTransit;
 using MassTransit.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PubSub.Core.Handlers;
 using PubSub.Core.Models;
@@ -9,7 +10,8 @@ using PubSub.MassTransit.Consumers;
 
 namespace PubSub.MassTransit; 
 public static class Extensions {
-    public static IServiceCollection AddMassTransitConfiguration(this IServiceCollection services, AzureServicebusOptions? config, PubSubAppMode mode) {
+    public static IServiceCollection AddMassTransitConfiguration(this IServiceCollection services, IConfiguration configuration, PubSubAppMode mode) {
+        var config = configuration.GetRequiredSection(nameof(AzureServicebusOptions)).Get<AzureServicebusOptions>();
         if (config == null)
             throw new ArgumentNullException(nameof(config));
         //LogContext.ConfigureCurrentLogContext(Logger);
